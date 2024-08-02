@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 def remove_extra_g1_when_multi_material(file_name, env_slicer_pp_output_name):
     with open(file_name, "r") as f:
@@ -11,10 +12,11 @@ def remove_extra_g1_when_multi_material(file_name, env_slicer_pp_output_name):
             start_line_slices = line.split(" ")
             for slice in start_line_slices:
                 if "TOTAL_TOOL_CHANGES" in slice:
-                    total_tool_changes = slice[-1]
+                    total_tool_changes = getNumbers(slice)[0]
                     break
             break
-        
+    print(total_tool_changes)
+    #input("test")
     if total_tool_changes != '0':
         output_slices = env_slicer_pp_output_name.split(".")
         env_slicer_pp_output_name = output_slices[0].replace(" ", "") + "_FIXED" + "." + output_slices[1]
@@ -30,6 +32,10 @@ def remove_extra_g1_when_multi_material(file_name, env_slicer_pp_output_name):
                 elif first_G1_removed and "set bed temperature" not in line:
                     f.write(line)
             f.close()
+
+def getNumbers(str):
+    array = re.findall(r'[0-9]+', str)
+    return array
 
 try:
     env_slicer_pp_output_name = str(os.getenv('SLIC3R_PP_OUTPUT_NAME'))
